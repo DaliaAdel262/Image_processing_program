@@ -1,5 +1,5 @@
 // FCAI – OOP Programming – 2023 - Assignment 1 - Part 1
-// Program Name:				image_processing_program.cpp (bonus)
+// Program Name:				image_processing_program.cpp (GRAYSCALE)
 // Last Modification Date:	10/11/2023
 // Teaching Assistant:		Dr Mohammed ElRamly
 // Purpose: The purpose of this program is to generate 15 different filters for any 256x256 bitmap image.
