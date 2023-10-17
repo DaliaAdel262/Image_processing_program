@@ -1,5 +1,5 @@
 // FCAI – OOP Programming – 2023 - Assignment 1 - Part 1
-// Program Name:				image_processing_program.cpp
+// Program Name:				image_processing_program.cpp (GRAYSCALE)
 // Last Modification Date:	10/11/2023
 // Teaching Assistant:		Dr Mohammed ElRamly
 // Purpose: The purpose of this program is to generate 15 different filters for any 256x256 bitmap image.
@@ -50,11 +50,11 @@ char imageFileName[100];
 void loadImage ();
 void loadImage2 ();
 void saveImage();
-void f1_BW();
-void f4_flip();
-void f7_Detect_Edges();
-void fa_mirror();
-void fd_crop();
+void f3_merge();
+void f5_Darken_and_brighten();
+void f9_shrink();
+void fc_blur ();
+void ff_skew_image_up();
 
 
 int main()
@@ -90,20 +90,25 @@ int main()
     switch(choice){
         case '0':
             return 0;
-        case '1':
-            f1_BW();
+        case '3':
+            f3_merge();
+            showGSBMP(image);
             goto question;
-        case '4':
-            f4_flip();
+        case '5':
+            f5_Darken_and_brighten();
+            showGSBMP(image);
             goto question;
-        case '7':
-            f7_Detect_Edges();
+        case '9':
+            f9_shrink();
+            showGSBMP(image);
             goto question;
-        case 'a':
-            fa_mirror();
+        case 'c':
+            fc_blur ();
+            showGSBMP(image);
             goto question;
-        case 'd':
-            fd_crop();
+        case 'f':
+            ff_skew_image_up();
+            showGSBMP(image);
             goto question;
         case 's':
             saveImage();
@@ -123,7 +128,6 @@ int main()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 // Functions to read and save image
 
@@ -168,202 +172,183 @@ void saveImage()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-// 1 - Black & White filter
-
-
-void f1_BW()
-{
-    // First part of this function calculates the average gray level of all pixels to be our reference for
-    // the black and white filter
-
-    int sum=0,average;
-
-    for (int i=0;i<SIZE;i++)
+void f3_merge(){
+    //  The function will create a new image,
+    //  with every pixel equal the average gray level of the corresponding pixels in the images to merge.
+    f3_merge:
+    //declaring for the second image that will be merged with the first one
+    // user is asked to enter the second image
+    loadImage2();
+// condition to make sure that the two images are not the same
+    if(imageFileName == imageFileName2)
     {
-        for(int j=0;j<SIZE;j++)
+        cout<<"please try again";
+        // function to make the user enter two new images in case he entered the same two before
+        goto f3_merge;
+    }
+    // looping over each pixel of the two images at the same time
+    for (int i=0; i<SIZE; i++)
+    {
+        for (int j=0; j<SIZE; j++)
         {
 
-            sum+=image[i][j];
-
+                // to calculate the average of each 2 pixels of the 2 images
+                image[i][j] = (image2[i][j] + image[i][j])/2;
         }
     }
+}
 
-    average = sum/(SIZE*SIZE);
+void f5_Darken_and_brighten() {
+    char elmatloob;
+    cout << "enter 'd' to darken or 'b' to brighten\n";
+    cin >> elmatloob;
 
-    // Second part of this function goes through every single pixel detecting whether it's above the average level of
-    // gray scale or below.
-    // If a pixel is above average level of gray scale, it leans more to the black spectrum and coloured black.
-    // If a pixel is below average level of gray scale, it leans more to the white spectrum and coloured white.
-
-    for (int i=0;i<SIZE;i++)
-    {
-        for(int j=0;j<SIZE;j++)
-        {
-            if(image[i][j] < average)
-            {
-
-                image[i][j] = 0;
-
+    switch(elmatloob){
+        case 'b':
+    // lighten case, the image will be merged with a white image by adding 255 to the pixels
+            for (int i = 0; i < SIZE; i++) {
+                for (int j = 0; j< SIZE; j++){
+                    image[i][j]=(image[i][j]+255)/2;
+                }
             }
-            else
-            {
+            break;
+    //Darken case means dividing pixels by 2 to darken the light by 50%
+        case 'd':
+            for (int i = 0; i < SIZE; i++) {
+                for (int j = 0; j< SIZE; j++)
+                    image[i][j]/=2;
+            }
+            break;
 
+        default:
+            cout<<"invalid input please try again";
+            f5_Darken_and_brighten();
+    }
+}
+
+void f9_shrink() {
+    //user will input to what extent he wants to shrink the img
+    cout << "please enter\n" "1 to a 1/2 shrink\n" "2 to a 1/3 shrink\n""3 to a 1/4 shrink" << endl;
+    int  shrink_level; cin >> shrink_level; shrink_level+=1;
+    int row = 0;
+    for (int i = 0; i < SIZE; i++) {
+        int col = 0;
+        for (int j = 0; j < SIZE; j++)
+        {
+            //If the current pixel is out of range(dependent on the ratio) set its value to 255(white)
+            if (i > SIZE / shrink_level || j > SIZE / shrink_level) {
                 image[i][j] = 255;
 
-            }
+            } else
+                //exclude pixels depending on specified ratio
+                image[i][j] = image[row][col];
+            col += shrink_level;
         }
+        row += shrink_level;
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void fc_blur () {
 
-// 4 - Flip filter
-
-
-void f4_flip()
-{
-
-    cout << "Flip (h)orizontally or (v)ertically ?" << '\n';
-    char choice;
-    cin >> choice;
-
-    // The following variable is position of the first pixel right next to the position of the mirror the image is
-    // being flipped accordingly to.
-    // It's the pixel that has already been changed/ swapped.
-    // Once we reach this pixel, the loop will be discontinued.
-    int axis_pos = ((SIZE-1)/2)+1;
-
-
-    switch(choice)
-    {
-        // In case of flipping image horizontally, we loop over each pixel in a column and swapping it with the mirrored
-        // version of that pixel until we reach the pixel right next to the axis of the mirror.
-        case 'h':
-
-            for(int j=0;j<SIZE;j++)
-            {
-                for(int i=0;i<axis_pos;i++)
-                {
-
-                    swap(image[i][j],image[SIZE-i][j]);
-
+    int sum = 0, avg, j = 0, i = 0;
+    //this while loop to call the function 5 times to increase the effectiveness of the filter
+    while (5--){
+        for (i = 0; i < SIZE; i++) {
+            for (j = 0; j < SIZE; j++) {
+                //condition for getting the avg of the corner pixels
+                if ((i == 0 && j == 255) || (i == 0 && j == 0)) {
+                    sum = image[i][j] + image[i][j + 1] + image[i + 1][j] + image[i + 1][j + 1];
+                    avg = sum / 4;
+                } else if ((i == 255 && j == 255) || (i == 255 && j == 0)) {
+                    sum = image[i][j] + image[i][j - 1] + image[i - 1][j] + image[i - 1][j - 1];
+                    avg = sum / 4;
+                }
+                //condition for getting the avg of the Edge pixels
+                else if (((i > 1 && i < 254) && j == 0) || ((i == 0 && j > 1) && j < 254) ||
+                         ((j > 1 && j < 254) && i == 0) ||
+                         ((i == 0 && j > 1) && j < 254)) {
+                    sum = image[i - 1][j] + image[i][j] + image[i + 1][j] + image[i - 1][j + 1] + image[i][j + 1] +
+                          image[i + 1][j + 1];
+                    avg = sum / 6;
+                    image[i][j] = avg;
+                } else {
+                    //last condition for editing in the pixels that is not corners nor edges
+                    sum = image[i][j] + image[i][j + 1] + image[i][j - 1] +
+                          image[i + 1][j] + image[i + 1][j + 1] + image[i + 1][j - 1] +
+                          image[i - 1][j] + image[i - 1][j + 1] + image[i - 1][j - 1];
+                    avg = sum / 9;
+                    image[i][j] = avg;
+                    image[i + 1][j] = avg;
+                    image[i - 1][j] = avg;
+                    image[i][j - 1] = avg;
+                    image[i + 1][j + 1] = avg;
+                    image[i + 1][j - 1] = avg;
+                    image[i - 1][j + 1] = avg;
+                    image[i - 1][j - 1] = avg;
                 }
             }
-            break;
-
-
-        // In case of flipping image vertically, we loop over each pixel in a row and swapping it with the mirrored
-        // version of that pixel until we reach the pixel right next to the axis of the mirror.
-        case 'v':
-
-            for (int i=0;i<SIZE;i++)
-            {
-                for (int j=0;j<axis_pos;j++)
-                {
-
-                    swap(image[i][(SIZE-1)-j],image[i][j]);
-
-                }
-            }
-            break;
-
+            avg = 0;
+        }
     }
+
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void ff_skew_image_up(){
 
-//a - Mirror filter
+    cout<<"give me the angle ya habiby:)";
 
+    double rad;
+    cin >> rad;
+    //to convert the input angle to rad because tan in cmath library take rad values only
+    rad = ( rad * 22.5 ) / ( 180 * 12 ) ;
+    // image will be shrunk first to prevent the image form going out of the range
 
-void fa_mirror()
-{
+    //mov variable represents the eq to get the new base of the shrunk image
+    //double declaration is to control the amount that the pixel will decrease as we go down on the corners
+    double mov = tan(rad) * 256 ,temp;
 
-    cout << "Mirror (l)eft, (r)ight, (u)upper, (d)own side?" << endl;
-    char choice;
-    cin >> choice;
+    //to get the point in which the pixels will begin to be skewed according to the angle
+    double step = mov / SIZE ;
+    mov  = floor(mov); //degree of skew
+    temp = mov;
 
-    int mirror_pos = ((SIZE-1)/2)+1;
-    if(choice=='l'){
-        for(int i=0;i<SIZE;i++){
-            for(int j=mirror_pos;j<SIZE;j++){
-                image[i][j] = image[i][SIZE-j];
-            }
+    unsigned char img_sk[SIZE+(int)mov][SIZE],sh_image[SIZE][SIZE];
+    //preparing image for skewing by convert each pixel to white
+    for (int j = 0; j < SIZE; ++j) {
+        for (int i = 0; i < SIZE+(int)mov; ++i) {
+            img_sk[i][j] =255;
         }
     }
-    else if(choice=='r'){
-        for(int i=0;i<SIZE;i++){
-            for(int j=0;j<mirror_pos;j++){
-                image[i][j] = image[i][(SIZE-1)-j];
-            }
+    for (int i = 0; i < SIZE; ++i) {
+        for (int j = 0; j < SIZE; ++j) {
+            sh_image[i][j] =255;
         }
     }
-    else if(choice=='u'){
-        for(int j=0;j<SIZE;j++){
-            for(int i=mirror_pos;i<SIZE;i++){
-                image[i][j] = image[(SIZE-1)-i][j];
+    //After shrinking this code will start to skew the image depending on the angle given
+    int avg = ceil((SIZE+temp)/SIZE);
+    for (int j = 0; j < SIZE; j++) {
+        for (int i = 0; i < (SIZE) / avg; i++) {
+            int avg2 = 0;
+            for (int k = 0; k < avg; ++k) {
+                avg2 += image[i* avg + k][j];
             }
+            avg2 /= avg;
+            sh_image[i][j] = avg2;
         }
     }
-    else if(choice=='d'){
-        for(int j=0;j<SIZE;j++){
-            for(int i=0;i<mirror_pos;i++){
-                image[i][j] = image[(SIZE-1)-i][j];
-            }
+// loop to apply the degree of skew
+    for ( int j = 0 ; j < SIZE ; j++ ){
+        for ( int i = 0 ; i < SIZE; i++ ){
+            img_sk[i+(int)mov][j] = sh_image[i][j];
         }
+        mov -= step ;
     }
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-// 7 - Detect edges filter
-
-
-void f7_Detect_Edges()
-{
-
-//    int sum=0,average;
-//    for (int i=0;i<SIZE;i++){
-//        for(int j=0;j<SIZE;j++){
-//            sum+=image[i][j];
-//        }
-//    }
-//    average = sum/(SIZE*SIZE);
-
-    for(int i=0;i<SIZE;i++){
-        for (int j=0;j<SIZE;j++) {
-            if (abs((image[i][j]-image[i][j+1]))>20){
-                continue;
-            }
-            else{
-                image[i][j]=255;
-            }
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// d - Crop filter
-
-
-void fd_crop()
-{
-
-    cout << "Please enter x y l w: \n";
-    int x,y,l,w;
-    cin>>x>>y>>l>>w;
-    for(int i=0;i<SIZE;i++){
-        for(int j=0;j<SIZE;j++){
-            if ((i<=l+y && i>=y) && j==x){
-                j+=w;
-            }
-            else{
-                image[i][j]=255;
-            }
+//to show the changes of the pixels in "image" insted "img_sk" that we’ve been working on
+    for ( int j = 0 ; j < SIZE ; j++ ){
+        for ( int i = 0 ; i < SIZE; i++ ){
+            image[i][j] = img_sk[i][j];
         }
     }
 }
