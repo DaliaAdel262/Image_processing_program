@@ -281,37 +281,71 @@ void f4_flip()
 
 void fa_mirror()
 {
-
+    // user input for which side of the image to be mirrored.
     cout << "Mirror (l)eft, (r)ight, (u)upper, (d)own side?" << endl;
     char choice;
     cin >> choice;
 
+    // A variable that represents the first pixel right after the axis upon which the image will be mirrored.
     int mirror_pos = ((SIZE-1)/2)+1;
-    if(choice=='l'){
-        for(int i=0;i<SIZE;i++){
-            for(int j=mirror_pos;j<SIZE;j++){
+
+    // This works depending on which direction the image will be mirrored.
+    // If chosen to mirror image to left, each pixel on the left side of the mirror axis will be replicated in the
+    // right side of the mirror axis.
+    if(choice=='l')
+    {
+        for(int i=0;i<SIZE;i++)
+        {
+            for(int j=mirror_pos;j<SIZE;j++)
+            {
+
                 image[i][j] = image[i][SIZE-j];
+
             }
         }
     }
-    else if(choice=='r'){
-        for(int i=0;i<SIZE;i++){
-            for(int j=0;j<mirror_pos;j++){
+
+    // If chosen to mirror image to right, each pixel on the right side of the mirror axis will be replicated in the
+    // left side of the mirror axis.
+    else if(choice=='r')
+    {
+        for(int i=0;i<SIZE;i++)
+        {
+            for(int j=0;j<mirror_pos;j++)
+            {
+
                 image[i][j] = image[i][(SIZE-1)-j];
+
             }
         }
     }
-    else if(choice=='u'){
-        for(int j=0;j<SIZE;j++){
-            for(int i=mirror_pos;i<SIZE;i++){
+
+    // If chosen to mirror image above, each pixel on the top side of the mirror axis will be replicated in the
+    // bottom side of the mirror axis.
+    else if(choice=='u')
+    {
+        for(int j=0;j<SIZE;j++)
+        {
+            for(int i=mirror_pos;i<SIZE;i++)
+            {
+
                 image[i][j] = image[(SIZE-1)-i][j];
+
             }
         }
     }
-    else if(choice=='d'){
-        for(int j=0;j<SIZE;j++){
-            for(int i=0;i<mirror_pos;i++){
+
+    // If chosen to mirror image below, each pixel on the bottom side of the mirror axis will be replicated in the
+    // top side of the mirror axis.
+    else if(choice=='d')
+    {
+        for(int j=0;j<SIZE;j++)
+        {
+            for(int i=0;i<mirror_pos;i++)
+            {
+
                 image[i][j] = image[(SIZE-1)-i][j];
+
             }
         }
     }
@@ -325,21 +359,23 @@ void fa_mirror()
 void f7_Detect_Edges()
 {
 
-//    int sum=0,average;
-//    for (int i=0;i<SIZE;i++){
-//        for(int j=0;j<SIZE;j++){
-//            sum+=image[i][j];
-//        }
-//    }
-//    average = sum/(SIZE*SIZE);
+    for(int i=0;i<SIZE;i++)
+    {
+        for (int j=0;j<SIZE;j++)
+        {
+            // To detect an edge we determine whether the difference between two neighbouring pixels is greater than
+            // a certain case which means that this pixel is considered an edge and therefore kept as it is.
+            if (abs((image[i][j]-image[i][j+1]))>20)
+            {
+                int temp = max(image[i][j],image[i][j+1]);
+                temp=0;
 
-    for(int i=0;i<SIZE;i++){
-        for (int j=0;j<SIZE;j++) {
-            if (abs((image[i][j]-image[i][j+1]))>20){
-                continue;
             }
-            else{
+            else
+            {
+
                 image[i][j]=255;
+
             }
         }
     }
@@ -352,17 +388,29 @@ void f7_Detect_Edges()
 
 void fd_crop()
 {
-
+    // user input for dimensions of the rectangle to be kept.
     cout << "Please enter x y l w: \n";
     int x,y,l,w;
     cin>>x>>y>>l>>w;
-    for(int i=0;i<SIZE;i++){
-        for(int j=0;j<SIZE;j++){
-            if ((i<=l+y && i>=y) && j==x){
+
+    for(int i=0;i<SIZE;i++)
+    {
+        for(int j=0;j<SIZE;j++)
+        {
+            // This works by a condtion that detects whether a pixel is the start of the rectangle to be kept, in which
+            // case we will incremet by width and keep all those pixels till we encounter a pixel that is not a part
+            // of the rectangle being kept.
+            if ((i<=l+y && i>=y) && j==x)
+            {
+
                 j+=w;
+
             }
-            else{
+            else
+            {
+                // Ofcourse all pixels that are not part of the rectangle are turned white.
                 image[i][j]=255;
+
             }
         }
     }
