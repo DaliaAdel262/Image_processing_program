@@ -1,5 +1,5 @@
 // FCAI – OOP Programming – 2023 - Assignment 1 - Part 1
-// Program Name:				image_processing_program.cpp
+// Program Name:				image_processing_program.cpp (bonus)
 // Last Modification Date:	10/11/2023
 // Teaching Assistant:		Dr Mohammed ElRamly
 // Purpose: The purpose of this program is to generate 15 different filters for any 256x256 bitmap image.
@@ -202,19 +202,17 @@ void f5_Darken_and_brighten() {
     char elmatloob;
     cout << "enter 'd' to darken or 'b' to brighten\n";
     cin >> elmatloob;
-    //Darken case means dividing pixels by 2 to darken the light by 50%
-    //brighten case means let each PIXEL > 205 EQUAL 255 AND add 50 to each pixel less than 205
 
     switch(elmatloob){
         case 'b':
-//          in lighten case increase each pixel < 205 by 50 and if the pixel > 205 let pixel eqaul 255 to avoid overload
+    // lighten case, the image will be merged with a white image by adding 255 to the pixels
             for (int i = 0; i < SIZE; i++) {
                 for (int j = 0; j< SIZE; j++){
                     image[i][j]=(image[i][j]+255)/2;
                 }
             }
             break;
-
+    //Darken case means dividing pixels by 2 to darken the light by 50%
         case 'd':
             for (int i = 0; i < SIZE; i++) {
                 for (int j = 0; j< SIZE; j++)
@@ -229,16 +227,20 @@ void f5_Darken_and_brighten() {
 }
 
 void f9_shrink() {
+    //user will input to what extent he wants to shrink the img
     cout << "please enter\n" "1 to a 1/2 shrink\n" "2 to a 1/3 shrink\n""3 to a 1/4 shrink" << endl;
     int  shrink_level; cin >> shrink_level; shrink_level+=1;
     int row = 0;
     for (int i = 0; i < SIZE; i++) {
         int col = 0;
-        for (int j = 0; j < SIZE; j++) {
+        for (int j = 0; j < SIZE; j++)
+        {
+            //If the current pixel is out of range(dependent on the ratio) set its value to 255(white)
             if (i > SIZE / shrink_level || j > SIZE / shrink_level) {
                 image[i][j] = 255;
 
             } else
+                //exclude pixels depending on specified ratio
                 image[i][j] = image[row][col];
             col += shrink_level;
         }
@@ -246,51 +248,7 @@ void f9_shrink() {
     }
 }
 
-void ff_skew_image_up() {
-    cout << "give me the angle :)";
 
-    double rad;
-    cout<<"give me the angle :)";
-    cin >> rad;
-    rad = ( rad * 22 ) / ( 180 * 7 ) ;
-    double mov = tan(rad) * 256 ,comp;
-    double step = mov / SIZE ;
-    mov  = floor(mov),comp = mov;
-    unsigned char img_in[SIZE][SIZE+(int)mov],shrink_image[SIZE][SIZE]; //change
-    for (int i = 0; i < SIZE+(int)mov; ++i) {    //change
-        for (int j = 0; j < SIZE; ++j) {         //change
-            img_in[j][i] =255;
-        }
-    }
-    for (int i = 0; i < SIZE; ++i) {
-        for (int j = 0; j < SIZE; ++j) {
-            shrink_image[j][i] =255;
-        }
-    }
-    int avg = ceil((SIZE+comp)/SIZE);
-    for (int i = 0; i < SIZE/ avg; i++) {    //change
-        for (int j = 0; j < (SIZE) ; j++) {
-            int avg2 = 0;
-            for (int k = 0; k < avg; ++k) {
-                avg2 += image[i* avg + k][j ]; //change
-            }
-            avg2 /= avg;
-            shrink_image[j][i] = avg2;
-        }
-    }
-    for ( int i = 0 ; i < SIZE ; i++ ){
-        for ( int j = 0 ; j < SIZE; j++ ){
-            img_in[j][i+(int)mov] = shrink_image[j][i]; //change
-        }
-        mov -= step ;
-    }
-    for ( int i = 0 ; i < SIZE ; i++ ){
-        for ( int j = 0 ; j < SIZE; j++ ){
-            image[j][i] = img_in[j][i];
-        }
-    }
-
-}
 void fc_blur () {
 
     int sum = 0, avg, j = 0, i = 0;
@@ -331,15 +289,24 @@ void fc_blur () {
     }
 }
 
-void fe_skew_image_up(){
-    cout<<"give me the angle :)";
+
+void ff_skew_image_up(){
+
+    cout<<"give me the angle ya habiby:)";
 
     double rad;
     cin >> rad;
-    rad = ( rad * 22.5 ) / ( 180 * 12 ) ;//convert angle from degree to radian
+    //to convert the input angle to rad because tan in cmath library take rad values only
+    rad = ( rad * 22.5 ) / ( 180 * 12 ) ;
+    // image will be shrunk first to prevent the image form going out of the range
+
+    //mov variable represents the eq to get the new base of the shrunk image
+    //double declaration is to control the amount that the pixel will decrease as we go down on the corners
     double mov = tan(rad) * 256 ,temp;
+
+    //to get the point in which the pixels will begin to be skewed according to the angle
     double step = mov / SIZE ;
-    mov  = floor(mov);//degree of skew
+    mov  = floor(mov); //degree of skew
     temp = mov;
 
     unsigned char img_sk[SIZE+(int)mov][SIZE],sh_image[SIZE][SIZE];
@@ -349,13 +316,12 @@ void fe_skew_image_up(){
             img_sk[i][j] =255;
         }
     }
-
-    //preparing image for shrinking by convert each pixel to white
     for (int i = 0; i < SIZE; ++i) {
         for (int j = 0; j < SIZE; ++j) {
             sh_image[i][j] =255;
         }
     }
+    //After shrinking this code will start to skew the image depending on the angle given
     int avg = ceil((SIZE+temp)/SIZE);
     for (int j = 0; j < SIZE; j++) {
         for (int i = 0; i < (SIZE) / avg; i++) {
@@ -367,18 +333,17 @@ void fe_skew_image_up(){
             sh_image[i][j] = avg2;
         }
     }
-
+// loop to apply the degree of skew
     for ( int j = 0 ; j < SIZE ; j++ ){
         for ( int i = 0 ; i < SIZE; i++ ){
             img_sk[i+(int)mov][j] = sh_image[i][j];
         }
         mov -= step ;
     }
-
+//to show the changes of the pixels in "image" insted "img_sk" that we’ve been working on
     for ( int j = 0 ; j < SIZE ; j++ ){
         for ( int i = 0 ; i < SIZE; i++ ){
             image[i][j] = img_sk[i][j];
         }
     }
-
 }
