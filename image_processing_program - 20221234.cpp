@@ -51,7 +51,7 @@ void loadImage ();
 void loadImage2 ();
 void saveImage();
 void f3_merge();
-void f5_Darken_and_brighten();
+void f6_Darken_and_brighten();
 void f9_shrink();
 void fc_blur ();
 void ff_skew_image_up();
@@ -60,7 +60,7 @@ void ff_skew_image_up();
 int main()
 {
 
-    cout << "Ahlan ya user ya habibi :) \n";
+    cout << "ezayek ya habiby :) \n";
 
     user_input:
     loadImage();
@@ -70,8 +70,8 @@ int main()
             "2- Invert Filter\n"
             "3- Merge Filter\n"
             "4- Flip Image\n"
-            "5- Darken and Lighten Image\n"
-            "6- Rotate Image\n"
+            "5- Rotate Image\n"
+            "6- Darken and Lighten Image\n"
             "7- Detect Image Edges\n"
             "8- Enlarge Image\n"
             "9- Shrink Image\n"
@@ -94,8 +94,8 @@ int main()
             f3_merge();
             showGSBMP(image);
             goto question;
-        case '5':
-            f5_Darken_and_brighten();
+        case '6':
+            f6_Darken_and_brighten();
             showGSBMP(image);
             goto question;
         case '9':
@@ -198,7 +198,7 @@ void f3_merge(){
     }
 }
 
-void f5_Darken_and_brighten() {
+void f6_Darken_and_brighten() {
     char elmatloob;
     cout << "enter 'd' to darken or 'b' to brighten\n";
     cin >> elmatloob;
@@ -219,10 +219,10 @@ void f5_Darken_and_brighten() {
                     image[i][j]/=2;
             }
             break;
-
+            // in case the user did not enter d nor l
         default:
             cout<<"invalid input please try again";
-            f5_Darken_and_brighten();
+            f6_Darken_and_brighten();
     }
 }
 
@@ -252,6 +252,9 @@ void f9_shrink() {
 void fc_blur () {
 
     int sum = 0, avg, j = 0, i = 0;
+    int increment = 2;
+    // loop to apply the filter twice to increase the effectiveness of the blur function
+    while (increment--){
         for (i = 0; i < SIZE; i++) {
             for (j = 0; j < SIZE; j++) {
                 //condition for getting the avg of the corner pixels
@@ -262,7 +265,7 @@ void fc_blur () {
                     sum = image[i][j] + image[i][j - 1] + image[i - 1][j] + image[i - 1][j - 1];
                     avg = sum / 4;
                 }
-                //condition for getting the avg of the Edge pixels
+                    //condition for getting the avg of the Edge pixels
                 else if (((i > 1 && i < 254) && j == 0) || ((i == 0 && j > 1) && j < 254) ||
                          ((j > 1 && j < 254) && i == 0) ||
                          ((i == 0 && j > 1) && j < 254)) {
@@ -289,7 +292,7 @@ void fc_blur () {
             }
             avg = 0;
         }
-
+    }
 }
 
 
@@ -325,6 +328,10 @@ void ff_skew_image_up(){
         }
     }
     //After shrinking this code will start to skew the image depending on the angle given
+
+    //	Add the new base to SIZE then divide it by SIZE.
+    // And use ceil function to returns the smallest possible integer value
+    // which is greater than or equal to the given argument.
     int avg = ceil((SIZE+temp)/SIZE);
     for (int j = 0; j < SIZE; j++) {
         for (int i = 0; i < (SIZE) / avg; i++) {
@@ -343,7 +350,7 @@ void ff_skew_image_up(){
         }
         mov -= step ;
     }
-//to show the changes of the pixels in "image" insted "img_sk" that we’ve been working on
+//to show the changes of the pixels in "image" instead "img_sk" that we’ve been working on
     for ( int j = 0 ; j < SIZE ; j++ ){
         for ( int i = 0 ; i < SIZE; i++ ){
             image[i][j] = img_sk[i][j];
