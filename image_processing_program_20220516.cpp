@@ -1,6 +1,6 @@
-// FCAI – OOP Programming – 2023 - Assignment 1 - Part 1
+// FCAI – OOP Programming – 2023 - Assignment 1 - FULL
 // Program Name:				image_processing_program.cpp
-// Last Modification Date:	10/11/2023
+// Last Modification Date:	10/18/2023
 // Teaching Assistant:		Dr Mohammed ElRamly
 // Purpose: The purpose of this program is to generate 15 different filters for any 256x256 bitmap image.
 
@@ -38,6 +38,7 @@ using namespace std;
 
 unsigned char image[SIZE][SIZE];
 unsigned char image2[SIZE][SIZE];
+unsigned char temp[SIZE][SIZE];
 char imageFileName2[100];
 char imageFileName[100];
 
@@ -49,8 +50,9 @@ char imageFileName[100];
 
 void loadImage ();
 void loadImage2 ();
+void loadImage_for_BW();
 void saveImage();
-void f1_BW();
+void f1_BW(unsigned char img[SIZE][SIZE]);
 void f4_flip();
 void f7_Detect_Edges();
 void fa_mirror();
@@ -91,19 +93,24 @@ int main()
         case '0':
             return 0;
         case '1':
-            f1_BW();
+            f1_BW(image);
+            showGSBMP(image);
             goto question;
         case '4':
             f4_flip();
+            showGSBMP(image);
             goto question;
         case '7':
             f7_Detect_Edges();
+            showGSBMP(image);
             goto question;
         case 'a':
             fa_mirror();
+            showGSBMP(image);
             goto question;
         case 'd':
             fd_crop();
+            showGSBMP(image);
             goto question;
         case 's':
             saveImage();
@@ -152,6 +159,12 @@ void loadImage2 ()
     readGSBMP(imageFileName2, image2);
 }
 
+void loadImage_for_BW()
+{
+    // Add to it .bmp extension and load image
+    readGSBMP(imageFileName, temp);
+}
+
 void saveImage()
 {
 
@@ -173,7 +186,7 @@ void saveImage()
 // 1 - Black & White filter
 
 
-void f1_BW()
+void f1_BW(unsigned char img[SIZE][SIZE])
 {
     // First part of this function calculates the average gray level of all pixels to be our reference for
     // the black and white filter
@@ -185,7 +198,7 @@ void f1_BW()
         for(int j=0;j<SIZE;j++)
         {
 
-            sum+=image[i][j];
+            sum+=img[i][j];
 
         }
     }
@@ -201,16 +214,16 @@ void f1_BW()
     {
         for(int j=0;j<SIZE;j++)
         {
-            if(image[i][j] < average)
+            if(img[i][j] < average)
             {
 
-                image[i][j] = 0;
+                img[i][j] = 0;
 
             }
             else
             {
 
-                image[i][j] = 255;
+                img[i][j] = 255;
 
             }
         }
@@ -276,6 +289,64 @@ void f4_flip()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+// 7 - Detect edges filter
+
+
+void f7_Detect_Edges()
+{
+    // We'll require working with two images, the user input-image and a temp for this filter.
+    loadImage_for_BW();
+
+    //The temp image will be the black and white version of the original image.
+    f1_BW(temp);
+
+    //The user-input image will be painted all white.
+    for (int i = 0; i < SIZE; i++)
+    {
+        for (int j = 0; j < SIZE; j++)
+        {
+
+            image[i][j] = 255;
+
+        }
+    }
+
+
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+
+            // We need to check if the pixel pointed to is black.
+            // If it's white then it's obvious it's not an edge.
+            if (temp[i][j] == 0) {
+
+                // To implement an edge, we need to check for the occurence of a white pixel surrounding the current
+                // pixel pointed to.
+                if ((temp[i][j + 1] == 255 || temp[i + 1][j + 1] == 255 || temp[i - 1][j + 1] == 255) ||
+                    (temp[i][j - 1] == 255 || temp[i - 1][j - 1] == 255 || temp[i + 1][j - 1] == 255) ||
+                    temp[i - 1][j] == 255 || temp[i + 1][j] == 255)
+                {
+
+                    // In the user-input image (which is painted white) we turn the edge-detected pixel black
+                    // to form an edge.
+                    image[i][j]=0;
+
+
+                }
+                else
+                {
+                    // If no white pixels were located, no change is done.
+                    continue;
+
+                }
+            }
+        }
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 //a - Mirror filter
 
 
@@ -305,8 +376,8 @@ void fa_mirror()
         }
     }
 
-    // If chosen to mirror image to right, each pixel on the right side of the mirror axis will be replicated in the
-    // left side of the mirror axis.
+        // If chosen to mirror image to right, each pixel on the right side of the mirror axis will be replicated in the
+        // left side of the mirror axis.
     else if(choice=='r')
     {
         for(int i=0;i<SIZE;i++)
@@ -320,8 +391,8 @@ void fa_mirror()
         }
     }
 
-    // If chosen to mirror image above, each pixel on the top side of the mirror axis will be replicated in the
-    // bottom side of the mirror axis.
+        // If chosen to mirror image above, each pixel on the top side of the mirror axis will be replicated in the
+        // bottom side of the mirror axis.
     else if(choice=='u')
     {
         for(int j=0;j<SIZE;j++)
@@ -335,8 +406,8 @@ void fa_mirror()
         }
     }
 
-    // If chosen to mirror image below, each pixel on the bottom side of the mirror axis will be replicated in the
-    // top side of the mirror axis.
+        // If chosen to mirror image below, each pixel on the bottom side of the mirror axis will be replicated in the
+        // top side of the mirror axis.
     else if(choice=='d')
     {
         for(int j=0;j<SIZE;j++)
@@ -345,36 +416,6 @@ void fa_mirror()
             {
 
                 image[i][j] = image[(SIZE-1)-i][j];
-
-            }
-        }
-    }
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-// 7 - Detect edges filter
-
-
-void f7_Detect_Edges()
-{
-
-    for(int i=0;i<SIZE;i++)
-    {
-        for (int j=0;j<SIZE;j++)
-        {
-            // To detect an edge we determine whether the difference between two neighbouring pixels is greater than
-            // a certain case which means that this pixel is considered an edge and therefore kept as it is.
-            if (abs((image[i][j]-image[i][j+1]))>20)
-            {
-                int temp = max(image[i][j],image[i][j+1]);
-                temp=0;
-
-            }
-            else
-            {
-
-                image[i][j]=255;
 
             }
         }
@@ -415,3 +456,4 @@ void fd_crop()
         }
     }
 }
+
